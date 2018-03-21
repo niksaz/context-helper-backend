@@ -3,6 +3,9 @@ package analysis
 import java.io._
 import java.util.{Calendar, Scanner}
 
+import ch.usi.inf.reveal.parsing.artifact.ArtifactSerializer
+import ch.usi.inf.reveal.parsing.model.visitors.TypeNodeVisitor
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
@@ -122,62 +125,54 @@ object DistributedAnalyzer {
     printWriter.close()
   }
 
-  def zipTypeIdQuestionCountMap(
-    typeIdQuestionCountList: List[mutable.ListBuffer[(Int, Int)]]
-  ): Unit = {
-    val typeIdQuestionCountMapFiles = List(
-      "data/typeIdQuestionCountMap08",
-      "data/typeIdQuestionCountMap16",
-      "data/typeIdQuestionCountMap24",
-      "data/typeIdQuestionCountMap32",
-      "data/typeIdQuestionCountMap40",
-      "data/typeIdQuestionCountMap51"
-    ).map(name => new File(name))
-
-    val coder = new Coder
-    typeIdQuestionCountMapFiles.foreach { partialMapFile =>
-      println(partialMapFile)
-      val scanner = new Scanner(partialMapFile)
-      var linesRead = 0
-      while (scanner.hasNext) {
-        val line = scanner.nextLine()
-        val questionCount = mutable.ListBuffer[(Int, Int)]()
-        val semicolonIndex = line.indexOf(':')
-        val typeId = line.substring(0, semicolonIndex).toInt
-        val questionCounts = line.substring(semicolonIndex + 1)
-        if (questionCounts.nonEmpty) {
-          questionCounts.split(";").foreach { questionCountString =>
-            val commaIndex = questionCountString.indexOf(',')
-            val questionId = questionCountString.substring(0, commaIndex).toInt
-            val count = questionCountString.substring(commaIndex + 1).toInt
-            questionCount.append((questionId, count))
-          }
-        }
-        typeIdQuestionCountList(typeId).appendAll(questionCount)
-
-        linesRead += 1
-        if (linesRead % 100000 == 0) {
-          println(s"$linesRead @ " + Calendar.getInstance.getTime)
-          coder.writeCompressedTypeIdQuestionCountList(
-            partialMapFile.toPath.getParent.resolve(
-              "compressed" + partialMapFile.getName.capitalize).toFile,
-            typeIdQuestionCountList)
-        }
-      }
-      scanner.close()
-      coder.writeCompressedTypeIdQuestionCountList(
-        partialMapFile.toPath.getParent.resolve("compressed" + partialMapFile.getName).toFile,
-        typeIdQuestionCountList)
-    }
-  }
-
-  def readNonZeroQuestionIdTerms(): Int = {
-    val file = new File("index/NonZeroQuestionIdTerms.txt")
-    val scanner = new Scanner(file)
-    val result = scanner.nextLine().toInt
-    scanner.close()
-    result
-  }
+//  def zipTypeIdQuestionCountMap(
+//    typeIdQuestionCountList: List[mutable.ListBuffer[(Int, Int)]]
+//  ): Unit = {
+//    val typeIdQuestionCountMapFiles = List(
+//      "data/typeIdQuestionCountMap08",
+//      "data/typeIdQuestionCountMap16",
+//      "data/typeIdQuestionCountMap24",
+//      "data/typeIdQuestionCountMap32",
+//      "data/typeIdQuestionCountMap40",
+//      "data/typeIdQuestionCountMap51"
+//    ).map(name => new File(name))
+//
+//    val coder = new Coder
+//    typeIdQuestionCountMapFiles.foreach { partialMapFile =>
+//      println(partialMapFile)
+//      val scanner = new Scanner(partialMapFile)
+//      var linesRead = 0
+//      while (scanner.hasNext) {
+//        val line = scanner.nextLine()
+//        val questionCount = mutable.ListBuffer[(Int, Int)]()
+//        val semicolonIndex = line.indexOf(':')
+//        val typeId = line.substring(0, semicolonIndex).toInt
+//        val questionCounts = line.substring(semicolonIndex + 1)
+//        if (questionCounts.nonEmpty) {
+//          questionCounts.split(";").foreach { questionCountString =>
+//            val commaIndex = questionCountString.indexOf(',')
+//            val questionId = questionCountString.substring(0, commaIndex).toInt
+//            val count = questionCountString.substring(commaIndex + 1).toInt
+//            questionCount.append((questionId, count))
+//          }
+//        }
+//        typeIdQuestionCountList(typeId).appendAll(questionCount)
+//
+//        linesRead += 1
+//        if (linesRead % 100000 == 0) {
+//          println(s"$linesRead @ " + Calendar.getInstance.getTime)
+//          coder.writeCompressedTypeIdQuestionCountList(
+//            partialMapFile.toPath.getParent.resolve(
+//              "compressed" + partialMapFile.getName.capitalize).toFile,
+//            typeIdQuestionCountList)
+//        }
+//      }
+//      scanner.close()
+//      coder.writeCompressedTypeIdQuestionCountList(
+//        partialMapFile.toPath.getParent.resolve("compressed" + partialMapFile.getName).toFile,
+//        typeIdQuestionCountList)
+//    }
+//  }
 
   def main(args: Array[String]): Unit = {
 //    val questionIdTermsTable = restoreQuestionIdTermsTable()
@@ -189,11 +184,33 @@ object DistributedAnalyzer {
 //    val countMap = restoreCountMap()
 //    println(s"${System.currentTimeMillis() - startTime}: completed countMap")
 
-    val typeIdTable = restoreTypeIdTable()
-    val typeIdQuestionCountList = mutable.ListBuffer[mutable.ListBuffer[(Int, Int)]]()
-    (0 to typeIdTable.size).foreach { _ =>
-      typeIdQuestionCountList.append(mutable.ListBuffer())
-    }
-    zipTypeIdQuestionCountMap(typeIdQuestionCountList.toList)
+//    val stormedDataset = new File("/Users/niksaz/Downloads/stormed-dataset")
+//    val jsonFilePaths = stormedDataset.listFiles()
+//    val jsonFilePath = jsonFilePaths(0)
+//
+//    val artifact = ArtifactSerializer.deserializeFromFile(jsonFilePath)
+//    val questionId = artifact.question.id
+//    val listVisitor = TypeNodeVisitor.list()
+//
+//    return
+
+//    val typeIdTable = restoreTypeIdTable()
+//    val typeIdQuestionCountArray = mutable.ListBuffer[mutable.ListBuffer[(Int, Int)]]()
+//    (0 to typeIdTable.size).foreach { _ =>
+//      typeIdQuestionCountArray.append(mutable.ListBuffer())
+//    }
+//    zipTypeIdQuestionCountMap(typeIdQuestionCountArray.toList)
+
+    val typesCount = 1124678
+
+    val startTime = System.currentTimeMillis()
+
+    val coder = new Coder
+    val typeIdQuestionCountArray =
+      coder.readCompressedTypeIdQuestionCountArray(
+        new File("index/compressedTypeIdQuestionCountMap"), 1124678)
+    println(s"${System.currentTimeMillis() - startTime} ms")
+    println(typeIdQuestionCountArray.length)
+    println(typeIdQuestionCountArray.count(list => list.nonEmpty))
   }
 }

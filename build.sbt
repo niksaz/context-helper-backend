@@ -1,4 +1,4 @@
-name := "stackoverflow-analyzer"
+name := "context-helper-backend"
 
 version := "0.1"
 
