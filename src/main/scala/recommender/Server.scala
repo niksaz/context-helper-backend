@@ -32,8 +32,9 @@ object Server {
 
   def main(args: Array[String]): Unit = {
     val typeProcessor = TypeProcessor()
-    // val typeIds = typeProcessor.recommendThreads(List("httppost"))
-    //TODO: Get scores for threads.
+//    val typeIds = typeProcessor.recommendThreads(List("HttpPost"))
+//    println(typeIds)
+//    return
 
     withResource(new ServerSocket(40000)) { serverSocket =>
       println("ServerSocket opened")
@@ -46,14 +47,14 @@ object Server {
             Range(0, count).foreach { _ => types.append(scanner.nextLine()) }
 
             println(s"received a request $types")
-            val threadIds = typeProcessor.recommendThreads(types.toList)
+            val threadIdScores = typeProcessor.recommendThreads(types.toList)
 
             val printWriter = new PrintWriter(socket.getOutputStream)
-            printWriter.println(threadIds.size)
-            threadIds.foreach(printWriter.println(_))
+            printWriter.println(threadIdScores.size)
+            threadIdScores.foreach(pair => printWriter.println(pair._1))
             printWriter.flush()
 
-            println(s"answered with $threadIds")
+            println(s"answered with $threadIdScores")
 
             printWriter.close()
             scanner.close()
