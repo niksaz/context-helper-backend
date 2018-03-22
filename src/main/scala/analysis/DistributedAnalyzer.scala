@@ -10,6 +10,21 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 object DistributedAnalyzer {
+  def restoreQuestionsScores(): Map[Int, Int] = {
+    val questionsScores = mutable.Map[Int, Int]()
+    val mapFile = new File("index/QuestionsScores.txt")
+    val scanner = new Scanner(mapFile)
+    while (scanner.hasNext) {
+      val line = scanner.nextLine()
+      val semicolonIndex = line.indexOf(':')
+      val questionId = line.substring(0, semicolonIndex).toInt
+      val score = line.substring(semicolonIndex + 1).toInt
+      questionsScores.put(questionId, score)
+    }
+    scanner.close()
+    questionsScores.toMap
+  }
+
   def restoreTypeIdTable(): Map[String, Int] = {
     val typeIdTable = mutable.Map[String, Int]()
     val mapFile = new File("index/TypeToTypeIdMap.txt")
@@ -184,9 +199,8 @@ object DistributedAnalyzer {
 //    val countMap = restoreCountMap()
 //    println(s"${System.currentTimeMillis() - startTime}: completed countMap")
 
-//    val stormedDataset = new File("/Users/niksaz/Downloads/stormed-dataset")
-//    val jsonFilePaths = stormedDataset.listFiles()
-//    val jsonFilePath = jsonFilePaths(0)
+    runDistributedAnalysis()
+
 //
 //    val artifact = ArtifactSerializer.deserializeFromFile(jsonFilePath)
 //    val questionId = artifact.question.id
@@ -201,16 +215,16 @@ object DistributedAnalyzer {
 //    }
 //    zipTypeIdQuestionCountMap(typeIdQuestionCountArray.toList)
 
-    val typesCount = 1124678
-
-    val startTime = System.currentTimeMillis()
-
-    val coder = new Coder
-    val typeIdQuestionCountArray =
-      coder.readCompressedTypeIdQuestionCountArray(
-        new File("index/compressedTypeIdQuestionCountMap"), 1124678)
-    println(s"${System.currentTimeMillis() - startTime} ms")
-    println(typeIdQuestionCountArray.length)
-    println(typeIdQuestionCountArray.count(list => list.nonEmpty))
+//    val typesCount = 1124678
+//
+//    val startTime = System.currentTimeMillis()
+//
+//    val coder = new Coder
+//    val typeIdQuestionCountArray =
+//      coder.readCompressedTypeIdQuestionCountArray(
+//        new File("index/compressedTypeIdQuestionCountMap"), 1124678)
+//    println(s"${System.currentTimeMillis() - startTime} ms")
+//    println(typeIdQuestionCountArray.length)
+//    println(typeIdQuestionCountArray.count(list => list.nonEmpty))
   }
 }
