@@ -24,6 +24,7 @@ class TypeProcessor(
       .foreach { typeId =>
         val encountered = typeIdQuestionCountArray(typeId)
         val idf = Math.log(termfulDocuments / encountered.size.toDouble)
+        println(typeId, idf)
         encountered.foreach { case (questionId, count) =>
           val frequency = count.toDouble / questionIdCountMap(questionId)
           val score = scoredQuestions(questionId)
@@ -34,7 +35,8 @@ class TypeProcessor(
   }
 
   private def postScoreToScore(postScore: Int): Double =
-    if (postScore <= 0) 0.0 else Math.log(postScore)
+    if (postScore == 0) 0.0
+    else if (postScore > 0) Math.log(postScore + Math.E) else -Math.log(-postScore + Math.E)
 }
 
 object TypeProcessor {
