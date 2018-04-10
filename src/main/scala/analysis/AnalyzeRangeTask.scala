@@ -4,7 +4,6 @@ import java.io.{File, PrintWriter}
 import java.util.Calendar
 
 import ch.usi.inf.reveal.parsing.artifact.ArtifactSerializer
-import ch.usi.inf.reveal.parsing.model.visitors.TypeNodeVisitor
 
 import scala.collection.mutable
 
@@ -57,8 +56,8 @@ class AnalyzeRangeTask(
       val questionId = artifact.question.id
       val questionScore = artifact.question.score
       questionsScores.put(questionId, questionScore)
-//      val listVisitor = TypeNodeVisitor.list()
-//      val collected = listVisitor(List(), artifact)
+//      val methodVisitor = MethodInvocationNodeVisitor.list()
+//      val collected = methodVisitor(List(), artifact)
 //      val typeCountMap = mutable.Map[String, Int]().withDefaultValue(0)
 //      for (node <- collected) {
 //        val count = typeCountMap(node.simpleName)

@@ -32,9 +32,6 @@ object Server {
 
   def main(args: Array[String]): Unit = {
     val typeProcessor = TypeProcessor()
-//    val typeIds = typeProcessor.recommendThreads(List("HttpPost"))
-//    println(typeIds)
-//    return
 
     withResource(new ServerSocket(40000)) { serverSocket =>
       println("ServerSocket opened")
